@@ -2,6 +2,7 @@ package com.noir.patientservice.service;
 
 import com.noir.patientservice.dto.PatientRequestDTO;
 import com.noir.patientservice.dto.PatientResponseDTO;
+import com.noir.patientservice.exception.EmailAlreadyExistsException;
 import com.noir.patientservice.mapper.PatientMapper;
 import com.noir.patientservice.model.Patient;
 import com.noir.patientservice.repository.PatientRepository;
@@ -28,6 +29,11 @@ public class PatientService {
     }
 
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
+        if (patientRepository.existsByEmail(patientRequestDTO.getEmail())) {
+            throw new EmailAlreadyExistsException("A patient with this email already exists: " + patientRequestDTO.getEmail());
+        }
+
+
         Patient newPatient = patientRepository.save(PatientMapper.toModel(patientRequestDTO));
 
         return PatientMapper.toDTO(newPatient);
