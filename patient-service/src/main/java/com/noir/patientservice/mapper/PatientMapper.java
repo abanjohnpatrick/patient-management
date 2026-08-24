@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public class PatientMapper {
+
     public static PatientResponseDTO toDTO(Patient patient) {
         PatientResponseDTO patientDto = new PatientResponseDTO();
         patientDto.setId(patient.getId().toString());
