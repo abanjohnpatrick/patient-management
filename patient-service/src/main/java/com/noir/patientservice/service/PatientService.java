@@ -8,10 +8,8 @@ import com.noir.patientservice.mapper.PatientMapper;
 import com.noir.patientservice.model.Patient;
 import com.noir.patientservice.repository.PatientRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
