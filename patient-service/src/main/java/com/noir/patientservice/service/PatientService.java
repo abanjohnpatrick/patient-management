@@ -1,9 +1,11 @@
 package com.noir.patientservice.service;
 
+import billing.BillingServiceGrpc;
 import com.noir.patientservice.dto.PatientRequestDTO;
 import com.noir.patientservice.dto.PatientResponseDTO;
 import com.noir.patientservice.exception.EmailAlreadyExistsException;
 import com.noir.patientservice.exception.PatientNotFoundException;
+import com.noir.patientservice.grpc.BillingServiceGrpcClient;
 import com.noir.patientservice.mapper.PatientMapper;
 import com.noir.patientservice.model.Patient;
 import com.noir.patientservice.repository.PatientRepository;
@@ -18,9 +20,11 @@ import static jakarta.persistence.GenerationType.UUID;
 @Service
 public class PatientService {
     private final PatientRepository patientRepository;
+    private final BillingServiceGrpcClient billingServiceGrpcClient;
 
-    public PatientService(PatientRepository patientRepository) {
+    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient) {
         this.patientRepository = patientRepository;
+        this.billingServiceGrpcClient = billingServiceGrpcClient;
     }
 
     public List<PatientResponseDTO> getPatients() {
@@ -35,8 +39,13 @@ public class PatientService {
             throw new EmailAlreadyExistsException("A patient with this email already exists: " + patientRequestDTO.getEmail());
         }
 
-
         Patient newPatient = patientRepository.save(PatientMapper.toModel(patientRequestDTO));
+
+        billingServiceGrpcClient.createBillingAccount(
+                newPatient.getId().toString(),
+                newPatient.getName(),
+                newPatient.getEmail()
+        );
 
         return PatientMapper.toDTO(newPatient);
     }
