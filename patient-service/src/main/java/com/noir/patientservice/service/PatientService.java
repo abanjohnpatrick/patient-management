@@ -6,6 +6,7 @@ import com.noir.patientservice.dto.PatientResponseDTO;
 import com.noir.patientservice.exception.EmailAlreadyExistsException;
 import com.noir.patientservice.exception.PatientNotFoundException;
 import com.noir.patientservice.grpc.BillingServiceGrpcClient;
+import com.noir.patientservice.kafka.KafkaProducer;
 import com.noir.patientservice.mapper.PatientMapper;
 import com.noir.patientservice.model.Patient;
 import com.noir.patientservice.repository.PatientRepository;
@@ -21,10 +22,12 @@ import static jakarta.persistence.GenerationType.UUID;
 public class PatientService {
     private final PatientRepository patientRepository;
     private final BillingServiceGrpcClient billingServiceGrpcClient;
+    private final KafkaProducer kafkaProducer;
 
-    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient) {
+    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient, KafkaProducer kafkaProducer) {
         this.patientRepository = patientRepository;
         this.billingServiceGrpcClient = billingServiceGrpcClient;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public List<PatientResponseDTO> getPatients() {
@@ -46,6 +49,8 @@ public class PatientService {
                 newPatient.getName(),
                 newPatient.getEmail()
         );
+
+        kafkaProducer.sendEvent(newPatient);
 
         return PatientMapper.toDTO(newPatient);
     }
